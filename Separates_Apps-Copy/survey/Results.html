@@ -1,0 +1,37 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Demographics Confirmation{{ endblock }}
+
+{{ block content }}
+<p>
+These are the answers you have provided. Please take a moment to review them. 
+</p>
+<br>
+<p>
+Your Major/Field of work is {{player.MajorORFieldOfWork}}.
+</p>
+<p>
+Your preferred gender is {{player.gender}}.
+</p>
+<p>
+Your yearly personal income falls in the range {{player.YearlyPersonalIncome}}.
+</p>
+<p>
+Your age falls in the range {{player.AgeRange}}.
+</p>
+<p>
+You believe your level of altruism is "{{player.Self_reported_altruism}}".
+</p>
+<p>
+Your friends would say your level of competition is "{{player.Competitiveness}}".
+</p>
+<br>
+<!--
+<p>
+If any of these are incorrect, please correct them on the previous page. 
+</p>
+
+{{ back_button }}
+-->
+{{ next_button }}
+
+{{ endblock }}

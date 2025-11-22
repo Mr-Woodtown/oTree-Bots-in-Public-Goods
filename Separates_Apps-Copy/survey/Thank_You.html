@@ -1,0 +1,16 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Title{{ endblock }}
+
+{{ block content }}
+
+<p>
+     Congratulations! You have completed the experiment. Your total payout is {{ player.payoff }}.
+</p>
+<p>
+    Thank you very much for participating. We will call you one by one outside the room to recieve your payout. 
+</p>
+
+
+{{ next_button }}
+
+{{ endblock }}

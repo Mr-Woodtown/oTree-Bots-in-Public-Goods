@@ -1,0 +1,138 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Contribute{{ endblock }}
+
+{{ block content }}
+
+<p>
+    This is a public goods game with
+    {{ C.PLAYERS_PER_GROUP }} players per group,
+    an endowment of {{ C.ENDOWMENT }} each round,
+    and an efficiency factor of {{ C.MULTIPLIER }} 
+    (how much larger the pool is after everyone has 
+    choosen a level of contribution).
+    The round number is {{ subsession.round_number }}.
+</p>
+<br>
+<p>
+    Please choose a contribution between 0 and 1 using the slider
+    (increments of 0.01).
+</p>
+
+{{ formfields }}
+
+<div style="margin-top: 0.75rem;">
+    <input type="range" id="contributionSlider" min="0" max="1" step="0.01" value="0" style="width: 100%;">
+    <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.75rem;">
+        <div>
+            Selected contribution: <strong><span id="contributionValue">0.00</span></strong>
+            <span style="color:#666;">(updates as you move the slider)</span>
+        </div>
+        <div>
+            Or type a value:
+            <input id="contributionText" type="number" min="0" max="1" step="0.01" inputmode="decimal" placeholder="0.00" style="width: 6rem;">
+        </div>
+    </div>
+    <div id="contributionError" style="color:#b00020; margin-top: 0.25rem; display:none;">Please enter a number between 0.00 and 1.00.</div>
+    <script>
+        (function () {
+            var hiddenInput = document.getElementById('id_contribution');
+            var slider = document.getElementById('contributionSlider');
+            var span = document.getElementById('contributionValue');
+            var text = document.getElementById('contributionText');
+            var error = document.getElementById('contributionError');
+            var form = document.querySelector('form');
+            if (!hiddenInput || !slider || !span || !text) return;
+
+            // Hide the default input and use slider for UX
+            try { hiddenInput.type = 'hidden'; } catch (e) { hiddenInput.style.display = 'none'; }
+
+            // format helper
+            var fmt = function (v) {
+                var n = parseFloat(v);
+                if (isNaN(n)) return '0.00';
+                return n.toFixed(2);
+            };
+            var isValidNumber = function (v) {
+                var n = parseFloat(v);
+                return !(isNaN(n) || !isFinite(n) || n < 0 || n > 1);
+            };
+            var showError = function (msg) {
+                if (!error) return;
+                error.textContent = msg || 'Please enter a number between 0.00 and 1.00.';
+                error.style.display = '';
+            };
+            var clearError = function () {
+                if (!error) return;
+                error.style.display = 'none';
+            };
+
+            // initialize values from the hidden input if present
+            var initial = hiddenInput.value || '0';
+            // Ensure both controls start in sync at 0.00 by default
+            slider.value = initial;
+            hiddenInput.value = initial;
+            text.value = fmt(initial);
+            span.textContent = fmt(initial);
+
+            // keep hidden input in sync with slider
+            var syncFromSlider = function () {
+                clearError();
+                hiddenInput.value = slider.value;
+                text.value = fmt(slider.value);
+                span.textContent = fmt(slider.value);
+            };
+            slider.addEventListener('input', syncFromSlider);
+            slider.addEventListener('change', syncFromSlider);
+
+            // also sync slider if hidden input changes (fallback)
+            hiddenInput.addEventListener('change', function(){
+                var v = hiddenInput.value || '0';
+                slider.value = v;
+                text.value = fmt(v);
+                span.textContent = fmt(v);
+            });
+
+            // typing into the text box
+            var syncFromText = function () {
+                var v = text.value.trim();
+                if (!isValidNumber(v)) {
+                    showError('Please enter a number between 0.00 and 1.00.');
+                    return;
+                }
+                clearError();
+                var n = parseFloat(v);
+                var rounded = Math.round(n * 100) / 100; // keep 2 decimals
+                slider.value = String(rounded);
+                hiddenInput.value = String(rounded);
+                span.textContent = fmt(rounded);
+            };
+            text.addEventListener('input', function() {
+                // show error while typing invalid input but don't sync until valid
+                var v = text.value.trim();
+                if (v === '') { showError('Please enter a number between 0.00 and 1.00.'); return; }
+                if (!isValidNumber(v)) { showError('Please enter a number between 0.00 and 1.00.'); return; }
+                clearError();
+            });
+            text.addEventListener('change', syncFromText);
+
+            // prevent submit if invalid
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    var v = text.value.trim();
+                    if (v === '' || !isValidNumber(v)) {
+                        e.preventDefault();
+                        showError('Please enter a number between 0.00 and 1.00.');
+                        text.focus();
+                        return false;
+                    }
+                    // ensure hidden mirrors validated value
+                    syncFromText();
+                });
+            }
+        })();
+    </script>
+</div>
+
+{{ next_button }}
+
+{{ endblock }}

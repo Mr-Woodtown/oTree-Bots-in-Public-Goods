@@ -1,0 +1,18 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Results{{ endblock }}
+
+{{ block content }}
+
+<p>
+    You started with an endowment of {{ C.ENDOWMENT }},
+    of which you contributed {{ player.contribution }}.
+</p>
+<p>
+    Your group contributed {{ group.round_contribution }},
+    resulting in an individual share of {{ group.individual_share }}.
+    Your round revenue is therefore {{ player.payoff }}.
+</p>
+
+{{ next_button }}
+
+{{ endblock }}
